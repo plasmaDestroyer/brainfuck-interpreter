@@ -16,8 +16,8 @@ fn main() {
     let file_path = &args[1];
     let input: Vec<char> = match fs::read_to_string(file_path) {
         Ok(content) => content.chars().collect(),
-        Err(_) => {
-            eprintln!("No File with that name found!");
+        Err(e) => {
+            eprintln!("Failed to read file '{}': {}", file_path, e);
             std::process::exit(1);
         }
     };
@@ -27,6 +27,7 @@ fn main() {
 
     if let Err(e) = run(&input, &mut cells) {
         eprintln!("{}", e);
+        std::process::exit(1);
     };
 }
 
@@ -45,12 +46,14 @@ fn run(program: &[char], cells: &mut [u8]) -> Result<(), String> {
                 if point + 1 == CELL_SIZE {
                     return Err("Cell Index exceeded the Maximum Bounds!".to_string())
                 }
+
                 point += 1;
             },
             '<' => {
                 if point == 0 {
                     return Err("Cell Index became less than Zero!".to_string())
                 }
+
                 point -= 1;
             },
             '+' => cells[point] = cells[point].wrapping_add(1),
@@ -60,7 +63,12 @@ fn run(program: &[char], cells: &mut [u8]) -> Result<(), String> {
                 if cells[point] == 0 { 
                     let mut bracket_count: i32 = 1;
                     while bracket_count > 0 {
+                        if program_point + 1 == program_length {
+                            return Err("Brackets are Mismatched in the input!".to_string())
+                        }
+                
                         program_point += 1;
+
                         if program[program_point] == '[' {
                             bracket_count += 1;
                         } else if program[program_point] == ']' {
@@ -73,7 +81,13 @@ fn run(program: &[char], cells: &mut [u8]) -> Result<(), String> {
                 if cells[point] != 0 {
                     let mut bracket_count: i32 = 1;
                     while bracket_count > 0 {
+                        
+                        if program_point == 0 {
+                            return Err("Brackets are Mismatched in the input!".to_string())
+                            }
+
                         program_point -= 1;
+                        
                         if program[program_point] == ']' {
                             bracket_count += 1;
                         } else if program[program_point] == '[' {
