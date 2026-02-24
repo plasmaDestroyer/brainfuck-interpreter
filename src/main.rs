@@ -5,25 +5,36 @@ use std::fs;
 fn main() {
 
     let args: Vec<String> = env::args().collect();
+
+    if args.len() == 1 {
+        eprintln!("No Input file provided!");
+        std::process::exit(1);
+    }
+
     let file_path = &args[1];
+    
+    let input: Vec<char> = fs::read_to_string(file_path)
+    .expect("Should have been able to read the file")
+    .chars()
+    .collect();
+
 
     let size: usize = 30_000;
     let mut cells: Vec<u8> = vec![0; size];
 
-    // let input: Vec<char> = "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.".chars().collect();
-    // let input: Vec<char> = ",.".chars().collect();
-    let input: Vec<char> = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file")
-        .chars()
-        .collect();
+    run(&input, &mut cells);
+}
+
+fn run(program: &[char], cells: &mut [u8]) {
     
-    let input_length: usize = input.len();
-
+    let program_length: usize = program.len();
+    
     let mut point: usize = 0;
-    let mut input_point: usize = 0;
-    while input_point < input_length {
-        let c: char = input[input_point];
-
+    let mut program_point: usize = 0;
+    
+    while program_point < program_length {
+        let c: char = program[program_point];
+    
         match c {
             '>' => point += 1,
             '<' => point -= 1,
@@ -34,10 +45,10 @@ fn main() {
                 if cells[point] == 0 { 
                     let mut bracket_count: i32 = 1;
                     while bracket_count > 0 {
-                        input_point += 1;
-                        if input[input_point] == '[' {
+                        program_point += 1;
+                        if program[program_point] == '[' {
                             bracket_count += 1;
-                        } else if input[input_point] == ']' {
+                        } else if program[program_point] == ']' {
                             bracket_count -= 1;
                         }
                     }
@@ -47,10 +58,10 @@ fn main() {
                 if cells[point] != 0 {
                     let mut bracket_count: i32 = 1;
                     while bracket_count > 0 {
-                        input_point -= 1;
-                        if input[input_point] == ']' {
+                        program_point -= 1;
+                        if program[program_point] == ']' {
                             bracket_count += 1;
-                        } else if input[input_point] == '[' {
+                        } else if program[program_point] == '[' {
                             bracket_count -= 1;
                         }
                     }
@@ -61,10 +72,10 @@ fn main() {
                 std::io::stdin().read(&mut input_buffer).unwrap();
                 cells[point] = input_buffer[0];
             }
-
+    
             _ => ()
         }
-
-        input_point += 1;
+    
+        program_point += 1;
     }
 }
