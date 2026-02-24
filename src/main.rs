@@ -2,6 +2,8 @@ use std::io::Read;
 use std::env;
 use std::fs;
 
+const CELL_SIZE: usize = 30_000;
+
 fn main() {
 
     let args: Vec<String> = env::args().collect();
@@ -14,18 +16,19 @@ fn main() {
     let file_path = &args[1];
     
     let input: Vec<char> = fs::read_to_string(file_path)
-    .expect("Should have been able to read the file")
-    .chars()
-    .collect();
+        .expect("Should have been able to read the file")
+        .chars()
+        .collect();
 
 
-    let size: usize = 30_000;
-    let mut cells: Vec<u8> = vec![0; size];
+    let mut cells: Vec<u8> = vec![0; CELL_SIZE];
 
-    run(&input, &mut cells);
+    if let Err(e) = run(&input, &mut cells) {
+        eprintln!("{}", e);
+    };
 }
 
-fn run(program: &[char], cells: &mut [u8]) {
+fn run(program: &[char], cells: &mut [u8]) -> Result<(), String> {
     
     let program_length: usize = program.len();
     
@@ -36,8 +39,18 @@ fn run(program: &[char], cells: &mut [u8]) {
         let c: char = program[program_point];
     
         match c {
-            '>' => point += 1,
-            '<' => point -= 1,
+            '>' => {
+                if point + 1 == CELL_SIZE {
+                    return Err("Cell Index exceeded the Maximum Bounds!".to_string())
+                }
+                point += 1
+            },
+            '<' => {
+                if point == 0 {
+                    return Err("Cell Index became less than Zero!".to_string())
+                }
+                point -= 1
+            },
             '+' => cells[point] = cells[point].wrapping_add(1),
             '-' => cells[point] = cells[point].wrapping_sub(1),
             '.' => print!("{}", cells[point] as char),
@@ -78,4 +91,6 @@ fn run(program: &[char], cells: &mut [u8]) {
     
         program_point += 1;
     }
+
+    Ok(())
 }
