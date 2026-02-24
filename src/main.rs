@@ -1,10 +1,13 @@
+use std::io::Read;
+
 fn main() {
 
     let size: usize = 30_000;
     let mut cells: Vec<u8> = vec![0; size];
 
-    let input: Vec<char> = ">+++++++++[<++++++++>-]<.>+++++++[<++++>-]<+.+++++++..+++.>>>++++++++[<++++>-]<.>>>++++++++++[<+++++++++>-]<---.<<<<.+++.------.--------.>>+.>++++++++++.".chars().collect();
+    // let input: Vec<char> = ">+++++++++[<++++++++>-]<.>+++++++[<++++>-]<+.+++++++..+++.>>>++++++++[<++++>-]<.>>>++++++++++[<+++++++++>-]<---.<<<<.+++.------.--------.>>+.>++++++++++.".chars().collect();
     // let input: Vec<char> = "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.".chars().collect();
+    let input: Vec<char> = ",.".chars().collect();
     let input_length: usize = input.len();
 
     let mut point: usize = 0;
@@ -32,7 +35,7 @@ fn main() {
                 }
             },
             ']' => {
-                if cells[point] != 0 { 
+                if cells[point] != 0 {
                     let mut bracket_count: i32 = 1;
                     while bracket_count > 0 {
                         input_point -= 1;
@@ -44,6 +47,11 @@ fn main() {
                     }
                 }
             },
+            ',' => {
+                let mut input_buffer: [u8; 1] = [0];
+                std::io::stdin().read(&mut input_buffer).unwrap();
+                cells[point] = input_buffer[0];
+            }
 
             _ => ()
         }
