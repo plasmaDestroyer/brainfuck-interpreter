@@ -14,11 +14,13 @@ fn main() {
     }
 
     let file_path = &args[1];
-    
-    let input: Vec<char> = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file")
-        .chars()
-        .collect();
+    let input: Vec<char> = match fs::read_to_string(file_path) {
+        Ok(content) => content.chars().collect(),
+        Err(_) => {
+            eprintln!("No File with that name found!");
+            std::process::exit(1);
+        }
+    };
 
 
     let mut cells: Vec<u8> = vec![0; CELL_SIZE];
@@ -43,13 +45,13 @@ fn run(program: &[char], cells: &mut [u8]) -> Result<(), String> {
                 if point + 1 == CELL_SIZE {
                     return Err("Cell Index exceeded the Maximum Bounds!".to_string())
                 }
-                point += 1
+                point += 1;
             },
             '<' => {
                 if point == 0 {
                     return Err("Cell Index became less than Zero!".to_string())
                 }
-                point -= 1
+                point -= 1;
             },
             '+' => cells[point] = cells[point].wrapping_add(1),
             '-' => cells[point] = cells[point].wrapping_sub(1),
@@ -82,9 +84,11 @@ fn run(program: &[char], cells: &mut [u8]) -> Result<(), String> {
             },
             ',' => {
                 let mut input_buffer: [u8; 1] = [0];
-                std::io::stdin().read(&mut input_buffer).unwrap();
-                cells[point] = input_buffer[0];
-            }
+                match std::io::stdin().read(&mut input_buffer) {
+                    Ok(_) => cells[point] = input_buffer[0],
+                    Err(e) => return Err(format!("Failed to read the Input: {e}"))
+                }
+            },
     
             _ => ()
         }
